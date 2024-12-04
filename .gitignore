@@ -1,22 +1,3 @@
-# OS related .gitignore
-.DS_Store
-
 # IDE related .gitignore
 /.idea
 *.iml
-
-# Build related .gitignore
-/target
-out/
-build/
-
-# Log files
-*.log
-
-# Derived files
-**/DerivedSources
-
-#Misc
-temp/
-*.tmp
-*.bak
