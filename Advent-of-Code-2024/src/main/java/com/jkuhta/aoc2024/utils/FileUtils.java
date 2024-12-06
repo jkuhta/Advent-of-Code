@@ -14,7 +14,7 @@ public class FileUtils {
 
     public static List<String> readLines(String input) {
 
-        ArrayList<String> lines = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
 
         try (Scanner scanner = new Scanner(input)) {
             while (scanner.hasNextLine()) {
@@ -23,5 +23,15 @@ public class FileUtils {
         }
 
         return lines;
+    }
+
+    public static char[][] read2DCharGrid(String input) {
+        List<char[]> tempList = new ArrayList<>();
+        try (Scanner scanner = new Scanner(input)) {
+            while (scanner.hasNextLine()) {
+                tempList.add(scanner.nextLine().toCharArray());
+            }
+        }
+        return tempList.toArray(new char[0][]);
     }
 }
