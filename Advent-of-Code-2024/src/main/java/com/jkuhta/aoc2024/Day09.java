@@ -52,79 +52,127 @@ public class Day09 {
 
     public static long solvePart2(String input) {
 
-        List<List<Integer>> blocks = new LinkedList<>();
-        for (int i = 0; i < input.length(); i++) {
-            int digit = Character.digit(input.toCharArray()[i], 10);
+        List<Block> blocks = new LinkedList<>();
+        int[] blockSizes = input.chars().map(c -> c - '0').toArray();
 
-            List<Integer> block = new LinkedList<>();
-            for (int j = 0; j < digit; j++) {
-                if (i % 2 == 0) {
-                    block.add(i / 2);
+        boolean prevIsEmpty = false;
+        Block previousBlock = null;
+        for (int blockIndex = 0; blockIndex < input.length(); blockIndex++) {
+            int blockSize = blockSizes[blockIndex];
+
+            Block newBlock = null;
+
+            if (blockSize > 0 && blockIndex % 2 == 0) {
+                newBlock = new Block(blockSize, blockIndex / 2);
+                prevIsEmpty = false;
+            } else if (blockSize > 0) {
+                if (prevIsEmpty) {
+                    Block lastBlock = blocks.get(blocks.size() - 1);
+                    lastBlock.size += blockSize;
+                    newBlock = lastBlock;
                 } else {
-                    block.add(-1);
+                    newBlock = new Block(blockSize, -1);
+                    prevIsEmpty = true;
                 }
             }
-            if (!block.isEmpty())
-                blocks.add(block);
+
+            if (newBlock != null) {
+                if (previousBlock != null) {
+                    previousBlock.next = newBlock;
+                    newBlock.prev = previousBlock;
+                }
+
+                blocks.add(newBlock);
+                previousBlock = newBlock;
+            }
         }
 
         long checksum = 0;
 
-        List<Integer> finalFileSystem = new LinkedList<>();
-        int blockIxFromEnd = blocks.size() - 1;
+        Block block = blocks.getLast();
+        while (block != null) {
 
-        for (int i = blocks.size() - 1; i >= 0; i--) {
-
-            if (!isFreeSpace(blocks.get(i))) {
-                List<Integer> block = blocks.get(i);
-                int emptyBlockIx = findEmptySpace(blocks, i, block.size());
-                if (emptyBlockIx >= 0) {
-                    List<Integer> emptyBlock = blocks.get(emptyBlockIx);
-
-                    List<Integer> newEmptyBlock = emptyBlock.subList(0, emptyBlock.size() - block.size());
-                    blocks.remove(block);
-                    blocks.add(i, emptyBlock.subList(0, block.size()));
-
-                    blocks.remove(emptyBlock);
-                    if (!newEmptyBlock.isEmpty())
-                        blocks.add(emptyBlockIx, newEmptyBlock);
-                    blocks.add(emptyBlockIx, block);
-
-                }
+            if (!isEmptySpace(block) && swapBlocks(blocks.getFirst(), block)) {
+                block.value = -1;
             }
+            block = block.prev;
         }
 
         int ix = 0;
-        for (int i = 0; i < blocks.size(); i++) {
-            for (int j = 0; j < blocks.get(i).size(); j++) {
-                if (!isFreeSpace(blocks.get(i)))
-                    checksum += (long) blocks.get(i).get(j) * (ix);
+        block = blocks.getFirst();
+        while (block != null) {
+
+            for (int j = 0; j < block.size; j++) {
+                if (!isEmptySpace(block))
+                    checksum += (long) block.value * (ix);
                 ix++;
             }
-
+            block = block.next;
         }
 
         return checksum;
     }
 
-    private static boolean isFreeSpace(List<Integer> block) {
-        return block.stream().anyMatch(num -> num < 0);
+    private static boolean isEmptySpace(Block block) {
+        return block.value == -1;
     }
 
-    private static int blockSum(List<Integer> block) {
-        int sum = 0;
-        for (int num : block) {
-            sum += num;
-        }
-        return sum;
-    }
+    private static boolean swapBlocks(Block possibleEmptyBlock, Block block) {
 
-    private static int findEmptySpace(List<List<Integer>> blocks, int blockIndex, int blockSize) {
-        for (int i = 0; i < blockIndex; i++) {
-            if (blocks.get(i).size() >= blockSize && isFreeSpace(blocks.get(i))) {
-                return i;
+        while (possibleEmptyBlock != block) {
+
+            if (possibleEmptyBlock.size >= block.size && isEmptySpace(possibleEmptyBlock)) {
+                int remainingSize = possibleEmptyBlock.size - block.size;
+
+                possibleEmptyBlock.size = block.size;
+
+                if (remainingSize > 0) {
+                    Block newBlock = new Block(remainingSize, -1);  // Add a new empty block
+                    newBlock.prev = possibleEmptyBlock;
+                    newBlock.next = possibleEmptyBlock.next;
+                    possibleEmptyBlock.next = newBlock;
+                }
+
+                possibleEmptyBlock.value = block.value;
+
+                return true;
             }
+
+            possibleEmptyBlock = possibleEmptyBlock.next;
         }
-        return -1;
+        return false;
+    }
+}
+
+class Block {
+    int size;
+    int value;
+    Block prev;
+    Block next;
+
+    public Block(int size, int value) {
+        this.size = size;
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        if (size <= 0) {
+            return "";
+        }
+        return String.valueOf(value >= 0 ? value : ".").repeat(size);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Block other = (Block) obj;
+        return this.value == other.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(value);
     }
 }
