@@ -34,4 +34,14 @@ public class FileUtils {
         }
         return tempList.toArray(new char[0][]);
     }
+
+    public static int[][] read2DIntGrid(String input) {
+        List<int[]> tempList = new ArrayList<>();
+        try (Scanner scanner = new Scanner(input)) {
+            while (scanner.hasNextLine()) {
+                tempList.add(scanner.nextLine().chars().map(c -> c - '0').toArray());
+            }
+        }
+        return tempList.toArray(new int[0][]);
+    }
 }

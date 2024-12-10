@@ -4,11 +4,20 @@ public class Point {
     private final int x;
     private final int y;
     private final char label;
+    private final int value;
 
     public Point(int x, int y, char label) {
         this.x = x;
         this.y = y;
         this.label = label;
+        this.value = 0;
+    }
+
+    public Point(int x, int y, int value) {
+        this.x = x;
+        this.y = y;
+        this.value = value;
+        this.label = '\0';
     }
 
     public int getX() {
@@ -21,6 +30,10 @@ public class Point {
 
     public char getLabel() {
         return label;
+    }
+
+    public int getValue() {
+        return value;
     }
 
     public double distanceTo(Point other) {
