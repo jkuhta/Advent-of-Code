@@ -1,3 +1,5 @@
 # IDE related .gitignore
 /.idea
 *.iml
+
+out/
