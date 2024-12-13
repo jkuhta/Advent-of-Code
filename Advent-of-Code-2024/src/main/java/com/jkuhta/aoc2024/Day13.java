@@ -25,7 +25,15 @@ public class Day13 {
     }
 
     public static long solvePart2(String input) {
-        return 0;
+        String[] machinesData = input.split("\n\n");
+
+        long totalTokens = 0;
+
+        for (String machineData : machinesData) {
+            Machine machine = parseMachine(machineData);
+            totalTokens += playMachine2(machine);
+        }
+        return totalTokens;
     }
 
     public static Machine parseMachine(String input) {
@@ -43,7 +51,7 @@ public class Day13 {
         return new Machine(new Button(3, ax, ay), new Button(1, bx, by), new Prize(px, py));
     }
 
-    public static long playMachine(Machine machine) {
+    public static int playMachine(Machine machine) {
         int minCost = Integer.MAX_VALUE;
 
         for (int aPresses = 0; aPresses <= 100; aPresses++) {
@@ -58,6 +66,31 @@ public class Day13 {
             }
         }
         return minCost == Integer.MAX_VALUE ? 0 : minCost;
+    }
+
+    public static long playMachine2(Machine machine) {
+        int ax = machine.a.x;
+        int ay = machine.a.y;
+        int bx = machine.b.x;
+        int by = machine.b.y;
+
+        long px = machine.p.x + 10000000000000L;
+        long py = machine.p.y + 10000000000000L;
+
+        int det = bx * ay - ax * by;
+        long numeratorX = bx * py - px * by;
+
+        if (det == 0 || numeratorX % det != 0) return 0;
+
+        long aPresses = numeratorX / det;
+        long numeratorY = px - aPresses * ax;
+
+        if (numeratorY % bx == 0) {
+            long bPresses = numeratorY / bx;
+            return aPresses * machine.a.cost + bPresses * machine.b.cost;
+        }
+
+        return 0;
     }
 
 }
