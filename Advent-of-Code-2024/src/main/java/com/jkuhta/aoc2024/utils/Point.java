@@ -3,7 +3,7 @@ package main.java.com.jkuhta.aoc2024.utils;
 public class Point {
     private final int x;
     private final int y;
-    private final char label;
+    private char label;
     private int value;
 
     public Point(int x, int y, char label) {
@@ -52,6 +52,10 @@ public class Point {
 
     public void setValue(int value) {
         this.value = value;
+    }
+
+    public void setLabel(char label) {
+        this.label = label;
     }
 
     public double distanceTo(Point other) {
