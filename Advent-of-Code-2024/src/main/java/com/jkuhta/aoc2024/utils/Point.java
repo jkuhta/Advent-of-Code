@@ -20,6 +20,13 @@ public class Point {
         this.label = '\0';
     }
 
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+        this.value = 0;
+        this.label = '\0';
+    }
+
     public Point(int x, int y, char label, int value) {
         this.x = x;
         this.y = y;
