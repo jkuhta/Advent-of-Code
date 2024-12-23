@@ -5,9 +5,11 @@ import main.java.com.jkuhta.aoc2024.utils.FileUtils;
 import main.java.com.jkuhta.aoc2024.utils.Point;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 public class Day06 {
     public static void main(String[] args) throws IOException {
@@ -19,106 +21,93 @@ public class Day06 {
     public static int solvePart1(String input) {
         char[][] grid = FileUtils.read2DCharGrid(input);
         List<Character> directions = List.of('^', '>', 'v', '<');
-        Point position = findCurrentPosition(grid, directions);
+        Point start = findCurrentPosition(grid, directions);
 
-        int direction = directions.indexOf(position.getLabel());
-        position.setValue(direction);
+        int direction = directions.indexOf(start.getLabel());
+        start.setValue(direction);
 
-        moveRecursive(position, grid);
-
-        return countChars(grid);
+        List<Point> visited = moveRecursive(start, grid, new ArrayList<>());
+        return new HashSet<>(visited).size();
     }
 
     public static int solvePart2(String input) {
         char[][] grid = FileUtils.read2DCharGrid(input);
         List<Character> directions = List.of('^', '>', 'v', '<');
-        Point position = findCurrentPosition(grid, directions);
+        Point start = findCurrentPosition(grid, directions);
 
-        int direction = directions.indexOf(position.getLabel());
-        position.setValue(direction);
+        int direction = directions.indexOf(start.getLabel());
+        start.setValue(direction);
 
-        Set<Point> visited = new HashSet<>();
-        int obstructionCount = moveRecursive2(position, grid, null, visited);
+        List<Point> visited = moveRecursive(start, grid, new ArrayList<>());
 
-        return obstructionCount;
-    }
+        Set<Point> obstructions = new HashSet<>();
 
-    public static void moveRecursive(Point position, char[][] grid) {
+        for (Point obstruction : visited) {
 
-        grid[position.getX()][position.getY()] = 'X';
+            if (!CommonUtils.isOutOfBounds(obstruction.getX(), obstruction.getY(), grid) && grid[obstruction.getX()][obstruction.getY()] != '#' && grid[obstruction.getX()][obstruction.getY()] != '^') {
+                grid[obstruction.getX()][obstruction.getY()] = 'O';
+                start.setValue(direction);
 
-        Point nextPosition = nextPosition(position);
-        int nextX = nextPosition.getX();
-        int nextY = nextPosition.getY();
-
-        if (CommonUtils.isOutOfBounds(nextX, nextY, grid)) {
-            return;
-        }
-
-        if (grid[nextX][nextY] == '#') {
-            position.setValue((position.getValue() + 1) % 4);
-            moveRecursive(position, grid);
-        } else {
-            moveRecursive(nextPosition, grid);
-        }
-    }
-
-    public static int moveRecursive2(Point position, char[][] grid, Point obstruction, Set<Point> visited) {
-
-
-        grid[position.getX()][position.getY()] = 'X';
-        visited.add(position);
-
-        Point nextPosition = nextPosition(position);
-        int nextX = nextPosition.getX();
-        int nextY = nextPosition.getY();
-
-        if (CommonUtils.isOutOfBounds(nextX, nextY, grid)) {
-            return 0;
-        }
-
-        Point finalNextPosition = nextPosition;
-        if (visited.stream().anyMatch(value -> value.equals(finalNextPosition) && value.getValue() == finalNextPosition.getValue())) {
-            return 1;
-        }
-
-        if (grid[nextX][nextY] == '#' || obstruction != null && obstruction.equals(nextPosition)) {
-            nextPosition = new Point(nextX, nextY, (position.getValue() + 1) % 4);
-            return moveRecursive2(nextPosition, grid, obstruction, visited);
-        } else {
-            if (obstruction != null ) {
-                return moveRecursive2(nextPosition, grid, obstruction, visited);
-            } else {
-                Point newObstruction = new Point(nextX, nextY, '0');
-                Point position2 = new Point(position.getX(), position.getY(), (position.getLabel() + 1) % 4);
-                return moveRecursive2(nextPosition, grid, obstruction, visited) + moveRecursive2(position2, grid, newObstruction, visited);
+                if (isLoop(start, grid, new ArrayList<>())) {
+                    obstructions.add(obstruction);
+                }
+                grid[obstruction.getX()][obstruction.getY()] = '.';
             }
         }
+
+        return obstructions.size();
+    }
+
+    public static List<Point> moveRecursive(Point position, char[][] grid, List<Point> visited) {
+
+        List<Point> newVisited = new ArrayList<>(visited);
+        newVisited.add(position);
+
+        Point nextPosition = nextPosition(position);
+
+        if (CommonUtils.isOutOfBounds(nextPosition.getX(), nextPosition.getY(), grid)) {
+            return newVisited;
+        }
+
+        while (grid[nextPosition.getX()][nextPosition.getY()] == '#') {
+            position.setValue((position.getValue() + 1) % 4);
+            nextPosition = nextPosition(position);
+        }
+        return moveRecursive(nextPosition, grid, newVisited);
+    }
+
+    public static boolean isLoop(Point position, char[][] grid, List<Point> visited) {
+
+        Point nextPosition = nextPosition(position);
+
+        if (CommonUtils.isOutOfBounds(nextPosition.getX(), nextPosition.getY(), grid)) {
+            return false;
+        }
+
+        if (visited.contains(nextPosition) && visited.get(visited.indexOf(nextPosition)).getValue() == nextPosition.getValue()) {
+            return true;
+        }
+
+        List<Point> newVisited = new ArrayList<>(visited);
+        newVisited.add(nextPosition);
+
+        while (grid[nextPosition.getX()][nextPosition.getY()] == '#' || grid[nextPosition.getX()][nextPosition.getY()] == 'O') {
+            position.setValue((position.getValue() + 1) % 4);
+            nextPosition = nextPosition(position);
+        }
+        return isLoop(nextPosition, grid, newVisited);
     }
 
     private static Point findCurrentPosition(char[][] grid, List<Character> targets) {
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid[i].length; j++) {
                 if (targets.contains(grid[i][j])) {
-                    return new Point(i,j, grid[i][j]);
+                    return new Point(i, j, grid[i][j]);
                 }
             }
         }
         return null;
     }
-
-    private static int countChars(char[][] grid) {
-        int count = 0;
-        for (char[] row : grid) {
-            for (char cell : row) {
-                if (cell == 'X') {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-
 
     private static Point nextPosition(Point point) {
         int nextX = point.getX();
@@ -136,9 +125,5 @@ public class Day06 {
         }
 
         return new Point(nextX, nextY, direction);
-    }
-
-    private static String encodeCoordinate(int x, int y) {
-        return x + "," + y;
     }
 }
