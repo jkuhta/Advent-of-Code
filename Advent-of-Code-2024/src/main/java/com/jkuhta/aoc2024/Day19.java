@@ -3,10 +3,7 @@ package main.java.com.jkuhta.aoc2024;
 import main.java.com.jkuhta.aoc2024.utils.FileUtils;
 
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public class Day19 {
     public static void main(String[] args) throws IOException {
@@ -32,13 +29,26 @@ public class Day19 {
     }
 
     public static int solvePart2(String input) {
-        return 0;
+
+        List<String> lines = FileUtils.readLines(input);
+        SortedSet<String> towels = new TreeSet<>(Comparator.comparingInt(String::length)
+                .thenComparing(Comparator.naturalOrder()));
+        towels.addAll(List.of(lines.getFirst().split(", ")));
+
+        Map<String, Integer> subDesignArrangements = new HashMap<>();
+
+        int count = 0;
+
+        for (int i = 2; i < lines.size(); i++) {
+            count += findAllArrangements(towels, lines.get(i), subDesignArrangements);
+        }
+
+        return count;
     }
 
     public static boolean isDesignPossible(SortedSet<String> towels, String line) {
 
         if (line.isEmpty()) return true;
-
         boolean isPossible;
 
         for (int i = 1; i <= line.length(); i++) {
@@ -48,13 +58,35 @@ public class Day19 {
                 isPossible = isDesignPossible(towels, substring);
 
                 if (isPossible) {
-                    towels.add(substring);
                     return true;
                 }
             }
         }
         return false;
 
+    }
+
+    public static int findAllArrangements(SortedSet<String> towels, String line, Map<String, Integer> subDesignArrangements) {
+
+        if (subDesignArrangements.containsKey(line)) return subDesignArrangements.get(line);
+        if (line.isEmpty()) {
+            System.out.println();
+            return 1;
+        }
+
+        int count = 0;
+
+        for (int i = 1; i <= line.length(); i++) {
+            String subDesign = line.substring(0, i);
+            if (towels.contains(subDesign)) {
+                String substring = line.substring(i);
+                System.out.println(subDesign);
+                count += findAllArrangements(towels, substring, subDesignArrangements);
+
+                if (count > 0) subDesignArrangements.put(subDesign, count);
+            }
+        }
+        return count;
     }
 
 
