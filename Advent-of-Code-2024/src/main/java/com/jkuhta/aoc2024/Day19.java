@@ -28,19 +28,19 @@ public class Day19 {
         return count;
     }
 
-    public static int solvePart2(String input) {
+    public static long solvePart2(String input) {
 
         List<String> lines = FileUtils.readLines(input);
         SortedSet<String> towels = new TreeSet<>(Comparator.comparingInt(String::length)
                 .thenComparing(Comparator.naturalOrder()));
         towels.addAll(List.of(lines.getFirst().split(", ")));
 
-        Map<String, Integer> subDesignArrangements = new HashMap<>();
+        Map<String, Long> subDesignArrangements = new HashMap<>();
 
-        int count = 0;
+        long count = 0;
 
         for (int i = 2; i < lines.size(); i++) {
-            count += findAllArrangements(towels, lines.get(i), subDesignArrangements);
+            count += findAllArrangements(towels, lines.get(i), subDesignArrangements, new ArrayList<>());
         }
 
         return count;
@@ -66,24 +66,25 @@ public class Day19 {
 
     }
 
-    public static int findAllArrangements(SortedSet<String> towels, String line, Map<String, Integer> subDesignArrangements) {
+    public static long findAllArrangements(SortedSet<String> towels, String line, Map<String, Long> subDesignArrangements, List<String> design) {
 
-        if (subDesignArrangements.containsKey(line)) return subDesignArrangements.get(line);
         if (line.isEmpty()) {
-            System.out.println();
             return 1;
         }
 
-        int count = 0;
+        if (subDesignArrangements.containsKey(line)) return subDesignArrangements.get(line);
+
+        long count = 0;
 
         for (int i = 1; i <= line.length(); i++) {
             String subDesign = line.substring(0, i);
             if (towels.contains(subDesign)) {
                 String substring = line.substring(i);
-                System.out.println(subDesign);
-                count += findAllArrangements(towels, substring, subDesignArrangements);
+                List<String> newDesign = new ArrayList<>(design);
+                newDesign.add(subDesign);
+                count += findAllArrangements(towels, substring, subDesignArrangements, newDesign);
 
-                if (count > 0) subDesignArrangements.put(subDesign, count);
+                if (count > 0) subDesignArrangements.put(line, count);
             }
         }
         return count;
