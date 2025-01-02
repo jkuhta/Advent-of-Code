@@ -1,26 +1,20 @@
 package main.java.com.jkuhta.aoc2024;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
-
 import main.java.com.jkuhta.aoc2024.utils.CommonUtils;
 import main.java.com.jkuhta.aoc2024.utils.FileUtils;
 import main.java.com.jkuhta.aoc2024.utils.Point;
 
-public class Day12
-{
-    public static void main(String[] args) throws IOException
-    {
+import java.io.IOException;
+import java.util.*;
+
+public class Day12 {
+    public static void main(String[] args) throws IOException {
         String input = FileUtils.readFile("12");
         System.out.println("Part 1: " + solvePart1(input));
         System.out.println("Part 2: " + solvePart2(input));
     }
 
-    public static int solvePart1(String input)
-    {
+    public static int solvePart1(String input) {
 
         char[][] points = FileUtils.read2DCharGrid(input);
 
@@ -28,13 +22,10 @@ public class Day12
 
         int price = 0;
 
-        for (int i = 0; i < points.length; i++)
-        {
-            for (int j = 0; j < points[i].length; j++)
-            {
+        for (int i = 0; i < points.length; i++) {
+            for (int j = 0; j < points[i].length; j++) {
                 Point point = new Point(i, j, points[i][j]);
-                if (!visited.contains(point))
-                {
+                if (!visited.contains(point)) {
                     Region region = floodFill(points, point, visited);
                     price += region.calculatePrice();
                 }
@@ -44,22 +35,35 @@ public class Day12
         return price;
     }
 
-    public static int solvePart2(String input)
-    {
+    public static int solvePart2(String input) {
+        char[][] points = FileUtils.read2DCharGrid(input);
 
-        return 0;
+        Set<Point> visited = new HashSet<>();
+
+        int price = 0;
+
+        for (int i = 0; i < points.length; i++) {
+            for (int j = 0; j < points[i].length; j++) {
+                Point point = new Point(i, j, points[i][j]);
+                if (!visited.contains(point)) {
+                    Region region = floodFill(points, point, visited);
+                    int sides = region.countCorners();
+//                    System.out.println(region.label + " : " + sides);
+                    price += sides * region.area;
+                }
+            }
+        }
+        return price;
     }
 
-    private static Region floodFill(char[][] points, Point point, Set<Point> visited)
-    {
+    private static Region floodFill(char[][] points, Point point, Set<Point> visited) {
         Queue<Point> queue = new LinkedList<>();
         Region region = new Region(point.getLabel());
         queue.add(point);
 
         char label = point.getLabel();
 
-        while (!queue.isEmpty())
-        {
+        while (!queue.isEmpty()) {
             Point current = queue.poll();
             int x = current.getX();
             int y = current.getY();
@@ -67,8 +71,7 @@ public class Day12
             if (region.points.contains(current))
                 continue;
 
-            if (CommonUtils.isOutOfBounds(x, y, points) || points[x][y] != region.label || visited.contains(current))
-            {
+            if (CommonUtils.isOutOfBounds(x, y, points) || points[x][y] != region.label || visited.contains(current)) {
                 region.incrementPerimeter();
                 continue;
             }
@@ -87,35 +90,59 @@ public class Day12
 
 }
 
-class Region
-{
+class Region {
     char label;
     int area;
     int perimeter;
+    List<Point> points = new ArrayList<>();
 
-    Set<Point> points = new HashSet<>();
-
-    public Region(char label)
-    {
+    public Region(char label) {
         this.label = label;
         this.area = 0;
         this.perimeter = 0;
     }
 
-    public void addPoint(Point point)
-    {
+    public void addPoint(Point point) {
         this.points.add(point);
         this.area++;
     }
 
-    public void incrementPerimeter()
-    {
+    public void incrementPerimeter() {
         this.perimeter++;
     }
 
-    public int calculatePrice()
-    {
+    public int calculatePrice() {
         return this.area * this.perimeter;
     }
 
+    public int countCorners() {
+        int numCorners = 0;
+
+        int[] offsets = {1, -1};
+
+        for (Point point : this.points) {
+            int row = point.getX();
+            int col = point.getY();
+
+            for (int rowOffset : offsets) {
+                for (int colOffset : offsets) {
+                    Point rowNeighbor = new Point(row + rowOffset, col, label);
+                    Point colNeighbor = new Point(row, col + colOffset, label);
+                    Point diagonalNeighbor = new Point(row + rowOffset, col + colOffset, label);
+
+                    if (!this.points.contains(rowNeighbor) && !this.points.contains(colNeighbor)) {
+                        numCorners++;
+                    }
+                    if (
+                            this.points.contains(rowNeighbor) &&
+                                    this.points.contains(colNeighbor) &&
+                                    !this.points.contains(diagonalNeighbor)
+                    ) {
+                        numCorners++;
+                    }
+                }
+            }
+        }
+        return numCorners;
+    }
 }
