@@ -5,9 +5,14 @@ public class Node extends Point {
     Node right;
     Node down;
     Node left;
+    Node prev;
 
     public Node(int x, int y, char label) {
         super(x, y, label);
+    }
+
+    public Node(int x, int y, char label, int value) {
+        super(x, y, label, value);
     }
 
     public void setUp(Node up) {
@@ -26,6 +31,10 @@ public class Node extends Point {
         this.left = left;
     }
 
+    public void setPrev(Node prev) {
+        this.prev = prev;
+    }
+
     public Node getUp() {
         return up;
     }
@@ -40,5 +49,9 @@ public class Node extends Point {
 
     public Node getLeft() {
         return left;
+    }
+
+    public Node getPrev() {
+        return prev;
     }
 }
