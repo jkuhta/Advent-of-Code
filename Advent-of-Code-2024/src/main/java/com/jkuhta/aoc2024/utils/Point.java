@@ -3,8 +3,8 @@ package main.java.com.jkuhta.aoc2024.utils;
 public class Point {
     private final int x;
     private final int y;
-    private char label;
-    private int value;
+    char label;
+    int value;
 
     public Point(int x, int y, char label) {
         this.x = x;
