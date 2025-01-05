@@ -1,6 +1,8 @@
 package main.java.com.jkuhta.aoc2024.utils;
 
 public class Node extends Point {
+
+    int distance;
     Node up;
     Node right;
     Node down;
@@ -13,6 +15,11 @@ public class Node extends Point {
 
     public Node(int x, int y, char label, int value) {
         super(x, y, label, value);
+    }
+
+    public Node(int x, int y, int distance) {
+        super(x, y);
+        this.distance = distance;
     }
 
     public void setUp(Node up) {
@@ -53,5 +60,9 @@ public class Node extends Point {
 
     public Node getPrev() {
         return prev;
+    }
+
+    public int getDistance() {
+        return this.distance;
     }
 }

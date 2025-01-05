@@ -58,8 +58,8 @@ public class Point {
         this.label = label;
     }
 
-    public double distanceTo(Point other) {
-        return (int) Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
+    public int manhattanDistanceTo(Point other) {
+        return Math.abs(this.x - other.x) + Math.abs(this.y - other.y);
     }
 
     @Override
