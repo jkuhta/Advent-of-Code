@@ -5,6 +5,7 @@ public class Point {
     private final int y;
     char label;
     int value;
+    String labelString;
 
     public Point(int x, int y, char label) {
         this.x = x;
@@ -25,6 +26,13 @@ public class Point {
         this.y = y;
         this.value = 0;
         this.label = '\0';
+    }
+
+    public Point(int x, int y, int value, String labelString) {
+        this.x = x;
+        this.y = y;
+        this.value = value;
+        this.labelString = labelString;
     }
 
     public Point(int x, int y, char label, int value) {
@@ -50,12 +58,20 @@ public class Point {
         return value;
     }
 
+    public String getLabelString() {
+        return labelString;
+    }
+
     public void setValue(int value) {
         this.value = value;
     }
 
     public void setLabel(char label) {
         this.label = label;
+    }
+
+    public void setLabelString(String labelString) {
+        this.labelString = labelString;
     }
 
     public int manhattanDistanceTo(Point other) {
